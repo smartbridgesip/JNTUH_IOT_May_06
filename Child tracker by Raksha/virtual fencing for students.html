@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>virtual fence Webpage</title>
+  
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+  <!--<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>-->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/gmaps.js/0.4.25/gmaps.js"></script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6I2FvXqtjrNMt472inLMTdHtjk8Dtaew"
+    async defer></script>
+  <!-- <script type="text/javascript" src="../gmaps.js"></script>
+  <link rel="stylesheet" type="text/css" href="examples.css" /> -->
+  <style>
+	body{
+  font-family: 'Droid Sans', 'Helvetica', Arial, sans-serif;
+    }
+	
+	h1{
+		color:red;
+	}
+	h4{
+		color:green;
+	  }
+	
+#map{
+  display: block;
+  width: 100%;
+  height: 450px;
+  margin: 0 auto;
+  }
+
+  </style>
+  
+	</head>
+	<body>
+	 <CENTER>
+	 <h1>Virtual fencing for Students</h1>
+	  <div id="map"></div>
+	 </CENTER>    
+		
+	</body>
+	</html>
+
+  
+  <script type="text/javascript">
+    var map;
+    $(document).ready(function(){	
+		get_maps();
+		 setInterval('get_maps()',18000);      
+    });
+function get_maps()
+{
+	var boundary_lat = ''
+	var boundary_long = ''
+	var mobile_no = ''
+	var radius_dyna = ''
+	var msg = 'The kid has moved out of boundary' ;
+	var marker_lat = '';
+	var marker_long = '';
+
+		$.getJSON('https://api.thingspeak.com/channels/787443/feeds/last.json?api_key=ERQA9XV50EO3JNV8', function(data) {
+			boundary_lat = parseFloat(17.493786);		
+			boundary_long = parseFloat(78.392418);
+			radius_dyna = parseInt(300);
+			mobile_no = 0;
+			
+			
+				map = new GMaps({
+					el: '#map',
+					lat: boundary_lat,
+					lng: boundary_long
+				  });
+					var circle = map.drawCircle({
+					lat:boundary_lat,
+					lng: boundary_long,
+					radius: radius_dyna,
+					strokeColor: '#BBD8E9',
+					strokeOpacity: 1,
+					strokeWeight:3,
+					fillColor: '#BBD8E9',
+					fillOpacity: 0.6
+				  }); 
+				
+				
+		
+		
+				$.getJSON('https://api.thingspeak.com/channels/787443/feeds/last.json?api_key=ERQA9XV50EO3JNV8', function(data1) {
+						
+					//marker_lat = parseFloat(data1.field1);		
+					//marker_long = parseFloat(data1.field2);
+					marker_lat = parseFloat(data1.field1);		
+					marker_long = parseFloat(data1.field2);
+					console.log(marker_lat);
+					console.log(marker_long);
+					
+					
+					
+					if (map.checkGeofence(marker_lat, marker_long, circle)) {
+
+							map.addMarker({
+								lat: marker_lat,
+								lng: marker_long,
+								draggable: true,
+								fences: [circle],
+								outside: function (marker, fence) {
+									//alert(msg);
+									$.get("http://smartenvironment.thesmartbridge.com/API/msg?key=123&mobile="+mobile_no+"&msg="+msg, function(data2, status){
+								
+									});
+									
+								}
+							});
+						}
+						else {
+						
+							map.addMarker({
+								lat: marker_lat,
+								lng: marker_long,
+								draggable: true,
+								fences: [circle],
+								outside: function (marker, fence) {
+								//alert(msg);
+									$.get("http://smartenvironment.thesmartbridge.com/API/msg?key=123&mobile="+mobile_no+"&msg="+msg, function(data2, status){
+								
+									});
+									
+								}
+							});
+							//alert(msg);
+							$.get("http://smartenvironment.thesmartbridge.com/API/msg?key=123&mobile="+mobile_no+"&msg="+msg, function(data2, status){
+							//alert(data2);
+							
+						   });
+							
+							
+						}
+					
+					});
+					
+			});	
+
+
+}	
+	
+	
+	
+	
+	
+	</script>
